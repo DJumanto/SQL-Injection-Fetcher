@@ -1,0 +1,1 @@
+# SQLI fetcher for ctf chall
