@@ -233,6 +233,8 @@ if __name__ == '__main__':
             print(return_columns(args.payload, args.table, args.column_count, args.keystring, args.substitution.split(',')))
         elif args.method == 'data':
             print(return_data(args.payload, args.table, args.column, args.column_count, args.keystring, args.substitution.split(',')))
+        else:
+            print("Please provide a method")
     else:
         if(args.url == None):
                 print("Please provide a URL for column blind mode")
@@ -255,5 +257,7 @@ if __name__ == '__main__':
                 print(return_data_blind(args.url, args.payload, args.table, args.column, args.mode))
             else:
                 print(return_data_blind(args.url, args.payload, args.table, args.column))
+        else:
+            print("Please provide a method")
 
 
